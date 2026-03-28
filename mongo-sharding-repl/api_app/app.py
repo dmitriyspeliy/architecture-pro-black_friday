@@ -2,6 +2,7 @@ import json
 import logging
 import os
 import time
+import asyncio
 from typing import List, Optional
 
 import motor.motor_asyncio
@@ -147,7 +148,7 @@ async def list_users(collection_name: str):
     List all of the user data in the database.
     The response is unpaginated and limited to 1000 results.
     """
-    time.sleep(1)
+    await asyncio.sleep(1)
     collection = db.get_collection(collection_name)
     return UserCollection(users=await collection.find().to_list(1000))
 

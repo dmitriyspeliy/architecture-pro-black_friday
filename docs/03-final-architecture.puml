@@ -1,0 +1,48 @@
+@startuml
+title Final Architecture - Sharding + Replication + Cache
+
+skinparam componentStyle rectangle
+skinparam shadowing false
+
+rectangle "pymongo_api" as app
+database "redis" as redis
+rectangle "mongos" as mongos
+
+frame "Config Server Replica Set" {
+  database "configSrv1" as cfg1
+  database "configSrv2" as cfg2
+  database "configSrv3" as cfg3
+}
+
+frame "Replica Set shard1" {
+  database "shard1-1\nPrimary" as s11
+  database "shard1-2\nSecondary" as s12
+  database "shard1-3\nSecondary" as s13
+}
+
+frame "Replica Set shard2" {
+  database "shard2-1\nPrimary" as s21
+  database "shard2-2\nSecondary" as s22
+  database "shard2-3\nSecondary" as s23
+}
+
+app --> redis : cache read/write
+app --> mongos : MongoDB requests
+
+mongos --> cfg1 : metadata
+mongos --> cfg2 : metadata
+mongos --> cfg3 : metadata
+
+mongos --> s11 : shard1 access
+mongos --> s21 : shard2 access
+
+s11 --> s12 : replication
+s11 --> s13 : replication
+
+s21 --> s22 : replication
+s21 --> s23 : replication
+
+cfg1 --> cfg2 : replication
+cfg1 --> cfg3 : replication
+
+@enduml
