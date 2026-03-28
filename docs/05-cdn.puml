@@ -1,0 +1,95 @@
+@startuml
+title Architecture v5 - CDN + Service Discovery + API Gateway + Horizontal Scaling
+
+skinparam componentStyle rectangle
+skinparam shadowing false
+
+actor "User EU" as user_eu
+actor "User US" as user_us
+actor "User Asia" as user_asia
+
+cloud "CDN EU" as cdn_eu
+cloud "CDN US" as cdn_us
+cloud "CDN Asia" as cdn_asia
+
+rectangle "static-content-origin" as static_origin
+rectangle "api-gateway" as gateway
+
+frame "Consul Cluster" {
+  database "consul1" as consul1
+  database "consul2" as consul2
+  database "consul3" as consul3
+}
+
+frame "Application Instances" {
+  rectangle "pymongo_api_1" as app1
+  rectangle "pymongo_api_2" as app2
+  rectangle "pymongo_api_3" as app3
+}
+
+database "redis" as redis
+rectangle "mongos" as mongos
+
+frame "Config Server Replica Set" {
+  database "configSrv1" as cfg1
+  database "configSrv2" as cfg2
+  database "configSrv3" as cfg3
+}
+
+frame "Replica Set shard1" {
+  database "shard1-1\nPrimary" as s11
+  database "shard1-2\nSecondary" as s12
+  database "shard1-3\nSecondary" as s13
+}
+
+frame "Replica Set shard2" {
+  database "shard2-1\nPrimary" as s21
+  database "shard2-2\nSecondary" as s22
+  database "shard2-3\nSecondary" as s23
+}
+
+user_eu --> cdn_eu : static content
+user_us --> cdn_us : static content
+user_asia --> cdn_asia : static content
+
+cdn_eu --> static_origin : fetch static files
+cdn_us --> static_origin : fetch static files
+cdn_asia --> static_origin : fetch static files
+
+user_eu --> gateway : API requests
+user_us --> gateway : API requests
+user_asia --> gateway : API requests
+
+gateway --> consul1 : service discovery
+gateway --> consul2 : service discovery
+gateway --> consul3 : service discovery
+
+gateway --> app1 : load balancing
+gateway --> app2 : load balancing
+gateway --> app3 : load balancing
+
+app1 --> redis : cache read/write
+app2 --> redis : cache read/write
+app3 --> redis : cache read/write
+
+app1 --> mongos : MongoDB requests
+app2 --> mongos : MongoDB requests
+app3 --> mongos : MongoDB requests
+
+mongos --> cfg1 : metadata
+mongos --> cfg2 : metadata
+mongos --> cfg3 : metadata
+
+mongos --> s11 : shard1 access
+mongos --> s21 : shard2 access
+
+s11 --> s12 : replication
+s11 --> s13 : replication
+
+s21 --> s22 : replication
+s21 --> s23 : replication
+
+cfg1 --> cfg2 : replication
+cfg1 --> cfg3 : replication
+
+@enduml

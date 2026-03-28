@@ -1,0 +1,19 @@
+@startuml
+title Architecture v1 - Sharding
+
+skinparam componentStyle rectangle
+skinparam shadowing false
+
+rectangle "pymongo_api" as app
+rectangle "mongos" as mongos
+database "configSrv" as config
+
+rectangle "shard1" as shard1
+rectangle "shard2" as shard2
+
+app --> mongos : MongoDB requests
+mongos --> config : cluster metadata
+mongos --> shard1 : shard routing
+mongos --> shard2 : shard routing
+
+@enduml

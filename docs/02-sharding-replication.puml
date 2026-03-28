@@ -1,0 +1,34 @@
+@startuml
+title Architecture v2 - Sharding + Replication
+
+skinparam componentStyle rectangle
+skinparam shadowing false
+
+rectangle "pymongo_api" as app
+rectangle "mongos" as mongos
+database "configSrv" as config
+
+frame "Replica Set shard1" {
+  database "shard1-1\nPrimary" as s11
+  database "shard1-2\nSecondary" as s12
+  database "shard1-3\nSecondary" as s13
+}
+
+frame "Replica Set shard2" {
+  database "shard2-1\nPrimary" as s21
+  database "shard2-2\nSecondary" as s22
+  database "shard2-3\nSecondary" as s23
+}
+
+app --> mongos : MongoDB requests
+mongos --> config : cluster metadata
+mongos --> s11 : shard1 access
+mongos --> s21 : shard2 access
+
+s11 --> s12 : replication
+s11 --> s13 : replication
+
+s21 --> s22 : replication
+s21 --> s23 : replication
+
+@enduml
