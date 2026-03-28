@@ -19,3 +19,10 @@
 
 ```bash
 docker compose up -d --build
+```
+
+## Инициализация кластера
+
+```bash
+bash scripts/mongo-init.sh
+```

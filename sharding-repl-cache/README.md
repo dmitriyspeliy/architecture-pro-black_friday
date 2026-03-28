@@ -104,3 +104,10 @@ curl http://localhost:8080
 mongo_topology_type = "Sharded"
 mongo_is_mongos = true
 cache_enabled = true
+
+### Проверка кеша
+
+Первый запрос будет медленнее, повторный — быстрее.
+
+curl http://localhost:8080/helloDoc/users
+curl http://localhost:8080/helloDoc/users

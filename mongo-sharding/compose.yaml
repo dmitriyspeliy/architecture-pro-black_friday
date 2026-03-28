@@ -69,9 +69,7 @@ services:
       - "27017:27017"
 
   pymongo_api:
-    build:
-      context: api_app
-      dockerfile: Dockerfile
+    image: kazhem/pymongo_api:1.0.0
     depends_on:
       - mongos
     ports:
